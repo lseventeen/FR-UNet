@@ -1,87 +1,54 @@
 # RF-UNet
 This repository is the official PyTorch code for the paper 'Full-Resolution Network 
-and Dual-ThresholdIteration for Retinal Vessel and CoronaryAngiograph Segmentation' 
+and Dual-Threshold Iteration for Retinal Vessel and Coronary Angiograph Segmentation' 
 (Wentao Liu, Huihua Yang, Tong Tian, Zhiwei Cao, Xipeng Pan, Weijin Xu and Yang Jin)
 
-## Introduction
+
 <div align="center">
   <img src="figs/FR-UNet.png" width="100%">
-  Framework of Study Group Learning.
+  Architecture of FR-UNet.
 </div>
 
-## Getting Started
  
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+## Prerequisites
  
-### Prerequisites
+
  
-What things you need to install the software and how to install them
- 
+Download our repo:
 ```
-Give examples
+git clone https://github.com/lseventeen/RF-UNet.git
+cd RF-UNet
 ```
- 
-### Installing
- 
-A step by step series of examples that tell you how to get a development env running
- 
-Say what the step will be
- 
+Install packages from requirements.txt
 ```
-Give the example
+pip install -r requirements.txt
 ```
  
-And repeat
+## Datasets processing
+Choose a path to create a folder with the dataset name and download datasets [DRIVE](https://www.dropbox.com/sh/z4hbbzqai0ilqht/AAARqnQhjq3wQcSVFNR__6xNa?dl=0),[CHASEDB1](https://blogs.kingston.ac.uk/retinal/chasedb1/),[STARE](https://cecas.clemson.edu/~ahoover/stare/probing/index.html),[CHUAC](https://figshare.com/s/4d24cf3d14bc901a94bf), and [DCA1](http://personal.cimat.mx:8181/~ivan.cruz/DB_Angiograms.html). Type this in terminal to run the data_process.py file
  
 ```
-until finished
+python data_process.py -dp DATASET_PATH -dn DATASET_NAME
 ```
  
-End with an example of getting some data out of the system or using it for a little demo
- 
-## Running the tests
- 
-Explain how to run the automated tests for this system
- 
-### Break down into end to end tests
- 
-Explain what these tests test and why
+## Training
+Type this in terminal to run the train.py file
  
 ```
-Give an example
+python train.py -dp DATASET_PATH
 ```
- 
-### And coding style tests
- 
-Explain what these tests test and why
+## Test
+Type this in terminal to run the test.py file
  
 ```
-Give an example
+python test.py -dp DATASET_PATH -wp WEIGHT_FILE_PATH
 ```
- 
-## Deployment
- 
-Add additional notes about how to deploy this on a live system
- 
-## Built With
- 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
- 
-## Contributing
- 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
- 
-## Versioning
- 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
- 
-## Authors
- 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
- 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+We have prepared the pre-trained models for both datasets in the folder 'pretrained_weights'. To replicate the results in the paper, directly run the following commands
+```
+python test.py -dp DATASET_PATH -wp pretrained_weights/DATASET_NAME
+```
+
+
  
 ## License
  
