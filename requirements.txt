@@ -1,0 +1,17 @@
+albumentations==0.5.2
+bunch==1.0.1
+loguru==0.5.3
+matplotlib==3.3.2
+numpy==1.20.3
+opencv_python==4.4.0.46
+Pillow==9.0.1
+ruamel.base==1.0.0
+scikit_learn==1.0.2
+segmentation==0.2.2
+timm==0.3.2
+torch==1.7.0
+torchstat==0.0.7
+torchvision==0.8.1
+tqdm==4.61.1
+ttach==0.0.3
+yacs==0.1.8

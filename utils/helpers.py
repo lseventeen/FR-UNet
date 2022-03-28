@@ -1,16 +1,16 @@
 import os
 import pickle
 import random
-
 import cv2
 import numpy as np
 import torch
 from torchvision.transforms import functional as F
 
+
 def get_instance(module, name, config, *args):
-    # GET THE CORRESPONDING CLASS / FCT
     return getattr(module, config[name]['type'])(*args, **config[name]['args'])
-    
+
+
 def seed_torch(seed=42):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -18,6 +18,7 @@ def seed_torch(seed=42):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
+
 
 class Fix_RandomRotation(object):
 
@@ -61,6 +62,14 @@ def dir_exists(path):
         os.makedirs(path)
 
 
+def remove_files(path):
+    for root, dirs, files in os.walk(path, topdown=False):
+        for name in files:
+            os.remove(os.path.join(root, name))
+        for name in dirs:
+            os.rmdir(os.path.join(root, name))
+
+
 def read_pickle(path, type):
     with open(file=path + f"/{type}.pkl", mode='rb') as file:
         img = pickle.load(file)
@@ -72,7 +81,7 @@ def save_pickle(path, type, img_list):
         pickle.dump(img_list, file)
 
 
-def dual_threshold_iteration(list, h_thresh, l_thresh, save=True):
+def double_threshold_iteration(list, h_thresh, l_thresh, save=True):
     bin_list = []
     for index, img in enumerate(list):
         img = np.array(torch.sigmoid(img).cpu().detach()*255, dtype=np.uint8)
@@ -89,16 +98,35 @@ def dual_threshold_iteration(list, h_thresh, l_thresh, save=True):
                         if gbin[i-1][j-1] or gbin[i-1][j] or gbin[i-1][j+1] or gbin[i][j-1] or gbin[i][j+1] or gbin[i+1][j-1] or gbin[i+1][j] or gbin[i+1][j+1]:
                             gbin[i][j] = 255
 
-        if save == True:
+        if save:
             cv2.imwrite(f"save_picture/bin{index}.png", bin)
             cv2.imwrite(f"save_picture/gbin{index}.png", gbin)
         bin_list.append(gbin/255)
     return np.array(bin_list)
 
 
-def remove_files(path):
-    for root, dirs, files in os.walk(path, topdown=False):
-        for name in files:
-            os.remove(os.path.join(root, name))
-        for name in dirs:
-            os.rmdir(os.path.join(root, name))
+def recompone_overlap(preds, img_h, img_w, stride_h, stride_w):
+    assert (len(preds.shape) == 4)
+    assert (preds.shape[1] == 1 or preds.shape[1] == 3)
+    patch_h = preds.shape[2]
+    patch_w = preds.shape[3]
+    N_patches_h = (img_h - patch_h) // stride_h + 1
+    N_patches_w = (img_w - patch_w) // stride_w + 1
+    N_patches_img = N_patches_h * N_patches_w
+    assert (preds.shape[0] % N_patches_img == 0)
+    N_full_imgs = preds.shape[0] // N_patches_img
+    full_prob = np.zeros((N_full_imgs, preds.shape[1], img_h, img_w))
+    full_sum = np.zeros((N_full_imgs, preds.shape[1], img_h, img_w))
+    k = 0
+    for i in range(N_full_imgs):
+        for h in range((img_h - patch_h) // stride_h + 1):
+            for w in range((img_w - patch_w) // stride_w + 1):
+                full_prob[i, :, h * stride_h:(h * stride_h) + patch_h, w * stride_w:(w * stride_w) + patch_w] += preds[
+                    k]
+                full_sum[i, :, h * stride_h:(h * stride_h) + patch_h,
+                         w * stride_w:(w * stride_w) + patch_w] += 1
+                k += 1
+    assert (k == preds.shape[0])
+    assert (np.min(full_sum) >= 1.0)
+    final_avg = full_prob / full_sum
+    return final_avg

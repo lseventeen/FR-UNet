@@ -1,25 +1,12 @@
-CUDA_VISIBLE_DEVICES: 5,
-
-data_process:
-  patch_size: 48
-  stride: 6
-
-
-
-data_set: 
-  path: /home/lwt/data_pro/vessel
-  name: DRIVE
-
-########### data_loader: #############
-batch_size: 256
-
 model:
   type: FRNet
-  args: {}
+  args:
+    {}
 
 loss:
   type: BCELoss
-  args: {}
+  args:
+    {}
 
 optimizer:
   type: Adam
@@ -28,18 +15,18 @@ optimizer:
     weight_decay: 1e-5
 
 lr_scheduler:
-
   type: CosineAnnealingLR
   args:
     T_max: 40
 
-
-###########   trainer: ##############
 epochs: 40
 save_dir: saved/
-save_period: 5
-log_dir: saved/runs
+val_per_epochs: 1
+save_period: 1
+tensorboard: true
 threshold: 0.5
-threshold_low: 0.4
+threshold_low: 0.3
 DTI: false
 amp: true
+tta: true
+CCC: false

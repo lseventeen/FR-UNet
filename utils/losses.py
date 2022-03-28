@@ -18,13 +18,29 @@ class FocalLoss(nn.Module):
             return loss.mean()
         return loss.sum()
 
+
 class BCELoss(nn.Module):
-    def __init__(self, reduction="mean"):
+    def __init__(self, reduction="mean", pos_weight=1.0):
+        pos_weight = torch.tensor(pos_weight).cuda()
         super(BCELoss, self).__init__()
-        self.bce_loss = nn.BCEWithLogitsLoss(reduction=reduction)
+        self.bce_loss = nn.BCEWithLogitsLoss(
+            reduction=reduction, pos_weight=pos_weight)
 
     def forward(self, prediction, targets):
         return self.bce_loss(prediction, targets)
+
+
+class CELoss(nn.Module):
+    def __init__(self, weight=[1, 1], ignore_index=-100, reduction='mean'):
+        super(CELoss, self).__init__()
+        weight = torch.tensor(weight).cuda()
+        self.CE = nn.CrossEntropyLoss(
+            weight=weight, ignore_index=ignore_index, reduction=reduction)
+
+    def forward(self, output, target):
+        loss = self.CE(output, target.squeeze(1).long())
+        return loss
+
 
 class DiceLoss(nn.Module):
     def __init__(self, smooth=1e-8):
@@ -33,14 +49,11 @@ class DiceLoss(nn.Module):
 
     def forward(self, prediction, target):
         prediction = torch.sigmoid(prediction)
-        # target_flat = target.contiguous().view(-1)
-        # intersection = (output_flat * target_flat).sum()
-        # loss = 1 - ((2. * intersection + self.smooth) /
-        #             (output_flat.sum() + target_flat.sum() + self.smooth))
         intersection = 2 * torch.sum(prediction * target) + self.smooth
         union = torch.sum(prediction) + torch.sum(target) + self.smooth
         loss = 1 - intersection / union
         return loss
+
 
 class CE_DiceLoss(nn.Module):
     def __init__(self, reduction="mean", D_weight=0.5):
@@ -52,17 +65,3 @@ class CE_DiceLoss(nn.Module):
     def forward(self, prediction, targets):
         return self.D_weight * self.DiceLoss(prediction, targets) + (1 - self.D_weight) * self.BCELoss(prediction,
                                                                                                        targets)
-
-
-
-class CE_Loss3(nn.Module):
-    def __init__(self, reduction="mean", D_weight=0.5):
-        super(CE_Loss3, self).__init__()
-        
-        self.l_Loss = BCELoss(reduction=reduction)
-        self.s_Loss = BCELoss(reduction=reduction)
-        self.f_Loss = BCELoss(reduction=reduction)
-        self.D_weight = D_weight
-
-    def forward(self, pre,l_pre,s_pre, tar,l_tar,s_tar):
-        return self.D_weight * self.f_Loss(pre, tar) + (1 - self.D_weight)/2 * self.l_Loss(l_pre,l_tar)+(1 - self.D_weight)/2 * self.s_Loss(s_pre,s_tar)
