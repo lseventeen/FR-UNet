@@ -1,5 +1,5 @@
 model:
-  type: FRNet
+  type: FR_Net
   args:
     {}
 

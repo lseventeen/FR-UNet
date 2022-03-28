@@ -1,1 +1,1 @@
-from .frnet import FRNet
+from .fr_unet import FR_Net

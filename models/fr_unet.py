@@ -110,9 +110,9 @@ class block(nn.Module):
             return x, x_up, x_down
 
 
-class FRNet(nn.Module):
+class FR_UNet(nn.Module):
     def __init__(self,  num_classes=1, num_channels=1, feature_scale=2,  dropout=0.2, fuse=True, out_ave=True):
-        super(FRNet, self).__init__()
+        super(FR_UNet, self).__init__()
         self.out_ave = out_ave
         filters = [64, 128, 256, 512, 1024]
         filters = [int(x / feature_scale) for x in filters]
