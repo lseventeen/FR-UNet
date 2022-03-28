@@ -53,8 +53,3 @@ python test.py -dp DATASET_PATH -wp pretrained_weights/DATASET_NAME
  
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
  
-## Acknowledgments
- 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
