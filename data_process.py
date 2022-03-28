@@ -187,9 +187,9 @@ def normalization(imgs_list):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-dp', '--dataset_path', default="datasets/DRIVE", type=str,
-                        help='the path of dataset')
+                        help='the path of dataset',required=True)
     parser.add_argument('-dn', '--dataset_name', default="DRIVE", type=str,
-                        help='the name of dataset')
+                        help='the name of dataset',choices=['DRIVE','CHASEDB1','STARE','CHUAC','DCA1'],required=True)
     parser.add_argument('-ps', '--patch_size', default=48,
                         help='the size of patch for image partition')
     parser.add_argument('-s', '--stride', default=6,

@@ -24,9 +24,9 @@ def main(data_path, weight_path, CFG, show):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-dp", "--dataset_path", default="/home/lwt/data_pro/vessel/DCA1", type=str,
-                        help="the path of dataset")
+                        help="the path of dataset",required=True)
     parser.add_argument("-wp", "--wetght_path", default="pretrain_weight/DCA1/checkpoint-epoch40.pth", type=str,
-                        help='the path of wetght.pt')
+                        help='the path of wetght.pt',required=True)
     parser.add_argument("--show", help="save predict image",
                         required=False, default=False, action="store_true")
     args = parser.parse_args()
