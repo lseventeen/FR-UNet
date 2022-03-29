@@ -6,7 +6,6 @@ and Dual-Threshold Iteration for Retinal Vessel and Coronary Angiograph Segmenta
 
 <div align="center">
   <img src="figs/FR-UNet.png" width="100%">
-  Architecture of FR-UNet.
 </div>
 
  
@@ -52,10 +51,5 @@ python test.py -dp DATASET_PATH -wp pretrained_weights/DATASET_NAME
  
 ## License
  
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
  
-## Acknowledgments
- 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
