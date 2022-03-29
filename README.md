@@ -1,4 +1,4 @@
-# RF-UNet
+# FR-UNet
 This repository is the official PyTorch code for the paper 'Full-Resolution Network 
 and Dual-Threshold Iteration for Retinal Vessel and Coronary Angiograph Segmentation' 
 (Wentao Liu, Huihua Yang, Tong Tian, Zhiwei Cao, Xipeng Pan, Weijin Xu and Yang Jin)
