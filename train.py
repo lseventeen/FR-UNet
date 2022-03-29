@@ -35,15 +35,15 @@ def main(CFG, data_path, batch_size, with_val=False):
         val_loader=val_loader if with_val else None
     )
 
-    return trainer.train()
+    trainer.train()
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-dp', '--dataset_path', default="/home/lwt/data_pro/vessel/DRIVE", type=str,
-                        help='the path of dataset', required=True)
+                        help='the path of dataset')
     parser.add_argument('-bs', '--batch_size', default=512,
-                        help='batch_size for trianing and validation', required=False)
+                        help='batch_size for trianing and validation')
     parser.add_argument("--val", help="split training data for validation",
                         required=False, default=False, action="store_true")
     args = parser.parse_args()

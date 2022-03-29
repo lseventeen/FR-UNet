@@ -49,9 +49,9 @@ class Trainer:
     def _train_epoch(self, epoch):
         self.model.train()
         wrt_mode = 'train'
-        tic = time.time()
         self._reset_metrics()
         tbar = tqdm(self.train_loader, ncols=160)
+        tic = time.time()
         for img, gt in tbar:
             self.data_time.update(time.time() - tic)
             img = img.cuda(non_blocking=True)
@@ -71,12 +71,13 @@ class Trainer:
                 self.optimizer.step()
             self.total_loss.update(loss.item())
             self.batch_time.update(time.time() - tic)
-            tic = time.time()
+            
             self._metrics_update(
                 *get_metrics(pre, gt, threshold=self.CFG.threshold).values())
             tbar.set_description(
                 'TRAIN ({}) | Loss: {:.4f} | AUC {:.4f} F1 {:.4f} Acc {:.4f}  Sen {:.4f} Spe {:.4f} Pre {:.4f} IOU {:.4f} |B {:.2f} D {:.2f} |'.format(
                     epoch, self.total_loss.average, *self._metrics_ave().values(), self.batch_time.average, self.data_time.average))
+            tic = time.time()
         self.writer.add_scalar(
             f'{wrt_mode}/loss', self.total_loss.average, epoch)
         for k, v in list(self._metrics_ave().items())[:-1]:
@@ -122,88 +123,6 @@ class Trainer:
         }
         return log
 
-    def test(self, dataset):
-
-        logger.info(f"###### TEST EVALUATION ######")
-        self.model.eval()
-        tbar = tqdm(self.test_loader, ncols=50)
-        imgs = []
-        pres = []
-        gts = []
-        if self.CFG.tta:
-            self.model = tta.SegmentationTTAWrapper(
-                self.model, tta.aliases.d4_transform(), merge_mode='mean')
-        tic1 = time.time()
-        total_loss = AverageMeter()
-        self._reset_metrics()
-        with torch.no_grad():
-            for img, gt in tbar:
-                img = img.cuda(non_blocking=True)
-                gt = gt.cuda(non_blocking=True)
-                if self.CFG.amp is True:
-                    with torch.cuda.amp.autocast(enabled=True):
-                        pre = self.model(img)
-                        loss = self.loss(pre, gt)
-                else:
-                    pre = self.model(img)
-                    loss = self.loss(pre, gt)
-                pres.extend(pre)
-                imgs.extend(img)
-                gts.extend(gt)
-                total_loss.update(loss.item())
-        tic2 = time.time()
-        test_time = tic2 - tic1
-        logger.info(f'test time:  {test_time}')
-        if dataset == "DRIVE":
-            H, W = 584, 565
-        elif dataset == "CHASEDB1":
-            H, W = 960, 999
-        elif dataset == "DCA1":
-            H, W = 300, 300
-        imgs = torch.cat(imgs, 0)
-        gts = torch.cat(gts, 0)
-        pres = torch.cat(pres, 0)
-        if self.CFG["data_set"]["name"] != "CHUAC":
-            imgs = TF.crop(imgs, 0, 0, H, W)
-            gts = TF.crop(gts, 0, 0, H, W)
-            pres = TF.crop(pres, 0, 0, H, W)
-
-        if self.show == True:
-            dir_exists("save_picture")
-            remove_files("save_picture")
-            n, _, _ = imgs.shape
-            for i in range(n):
-                predict = torch.sigmoid(pres[i]).cpu().detach().numpy()
-                predict_b = np.where(predict >= self.CFG.threshold, 1, 0)
-                cv2.imwrite(
-                    f"save_picture/img{i}.png", np.uint8(imgs[i].cpu().numpy()*255))
-                cv2.imwrite(f"save_picture/gt{i}.png",
-                            np.uint8(gts[i].cpu().numpy()*255))
-                cv2.imwrite(f"save_picture/pre{i}.png", np.uint8(predict*255))
-                cv2.imwrite(
-                    f"save_picture/pre_b{i}.png", np.uint8(predict_b*255))
-
-        if self.CFG.DTI:
-            pre_DTI = double_threshold_iteration(
-                pres, self.CFG.threshold, self.CFG.threshold_low, True)
-            metrics = get_metrics(pres, gts, predict_b=pre_DTI, )
-            if self.CFG.CCC:
-                pre_num, gt_num = count_connect_component(pre_DTI, gts)
-        else:
-            metrics = get_metrics(pres, gts, self.CFG.threshold)
-            if self.CFG.CCC:
-                pre_num, gt_num = count_connect_component(
-                    pres, gts, threshold=self.CFG.threshold)
-        tic3 = time.time()
-        metrics_time = tic3 - tic1
-        logger.info(f'metrics time:  {metrics_time}')
-        logger.info(f'         loss: {total_loss.average}')
-        for k, v in metrics.items():
-            logger.info(f'         {str(k):15s}: {v}')
-        if self.CFG.CCC:
-            logger.info(f'         pre_num: {pre_num}')
-            logger.info(f'         gt_num: {gt_num}')
-
     def _save_checkpoint(self, epoch):
         state = {
             'arch': type(self.model).__name__,
@@ -229,7 +148,7 @@ class Trainer:
         self.spe = AverageMeter()
         self.pre = AverageMeter()
         self.iou = AverageMeter()
-
+        self.CCC = AverageMeter()
     def _metrics_update(self, auc, f1, acc, sen, spe, pre, iou):
         self.auc.update(auc)
         self.f1.update(f1)

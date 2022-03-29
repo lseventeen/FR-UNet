@@ -1,1 +1,1 @@
-from .fr_unet import FR_Net
+from .fr_unet import FR_UNet

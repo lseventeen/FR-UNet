@@ -4,3 +4,4 @@ wandb
 save_picture
 __pycache__
 README.md
+.gitignore

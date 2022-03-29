@@ -73,18 +73,13 @@ def get_metrics(predict, target, threshold=None, predict_b=None):
 
 
 def count_connect_component(predict, target, threshold=None, connectivity=8):
-    gt_num, pre_num = 0, 0
     if threshold != None:
         predict = torch.sigmoid(predict).cpu().detach().numpy()
         predict = np.where(predict >= threshold, 1, 0)
-
     if torch.is_tensor(target):
         target = target.cpu().detach().numpy()
-    for i in range(len(predict)):
-        pre_n, _, _, _ = cv2.connectedComponentsWithStats(np.asarray(
-            predict[i, :, :], dtype=np.uint8)*255, connectivity=connectivity)
-        gt_n, _, _, _ = cv2.connectedComponentsWithStats(np.asarray(
-            target[i, :, :], dtype=np.uint8)*255, connectivity=connectivity)
-        pre_num += pre_n
-        gt_num += gt_n
-    return pre_num, gt_num
+    pre_n, _, _, _ = cv2.connectedComponentsWithStats(np.asarray(
+        predict, dtype=np.uint8)*255, connectivity=connectivity)
+    gt_n, _, _, _ = cv2.connectedComponentsWithStats(np.asarray(
+        target, dtype=np.uint8)*255, connectivity=connectivity)
+    return pre_n/gt_n

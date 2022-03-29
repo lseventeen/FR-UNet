@@ -81,28 +81,24 @@ def save_pickle(path, type, img_list):
         pickle.dump(img_list, file)
 
 
-def double_threshold_iteration(list, h_thresh, l_thresh, save=True):
-    bin_list = []
-    for index, img in enumerate(list):
-        img = np.array(torch.sigmoid(img).cpu().detach()*255, dtype=np.uint8)
-        bin = np.where(img >= h_thresh*255, 255, 0).astype(np.uint8)
-        gbin = bin.copy()
-        h, w = img.shape
-        gbin_pre = gbin-1
+def double_threshold_iteration(index,img, h_thresh, l_thresh, save=True):
+    h, w = img.shape
+    img = np.array(torch.sigmoid(img).cpu().detach()*255, dtype=np.uint8)
+    bin = np.where(img >= h_thresh*255, 255, 0).astype(np.uint8)
+    gbin = bin.copy()
+    gbin_pre = gbin-1
+    while(gbin_pre.all() != gbin.all()):
+        gbin_pre = gbin
+        for i in range(h):
+            for j in range(w):
+                if gbin[i][j] == 0 and img[i][j] < h_thresh*255 and img[i][j] >= l_thresh*255:
+                    if gbin[i-1][j-1] or gbin[i-1][j] or gbin[i-1][j+1] or gbin[i][j-1] or gbin[i][j+1] or gbin[i+1][j-1] or gbin[i+1][j] or gbin[i+1][j+1]:
+                        gbin[i][j] = 255
 
-        while(gbin_pre.all() != gbin.all()):
-            gbin_pre = gbin
-            for i in range(h):
-                for j in range(w):
-                    if gbin[i][j] == 0 and img[i][j] < h_thresh*255 and img[i][j] >= l_thresh*255:
-                        if gbin[i-1][j-1] or gbin[i-1][j] or gbin[i-1][j+1] or gbin[i][j-1] or gbin[i][j+1] or gbin[i+1][j-1] or gbin[i+1][j] or gbin[i+1][j+1]:
-                            gbin[i][j] = 255
-
-        if save:
-            cv2.imwrite(f"save_picture/bin{index}.png", bin)
-            cv2.imwrite(f"save_picture/gbin{index}.png", gbin)
-        bin_list.append(gbin/255)
-    return np.array(bin_list)
+    if save:
+        cv2.imwrite(f"save_picture/bin{index}.png", bin)
+        cv2.imwrite(f"save_picture/gbin{index}.png", gbin)
+    return gbin/255
 
 
 def recompone_overlap(preds, img_h, img_w, stride_h, stride_w):

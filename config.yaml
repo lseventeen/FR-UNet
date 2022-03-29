@@ -1,5 +1,5 @@
 model:
-  type: FR_Net
+  type: FR_UNet
   args:
     {}
 
@@ -26,7 +26,7 @@ save_period: 1
 tensorboard: true
 threshold: 0.5
 threshold_low: 0.3
-DTI: false
+DTI: true
 amp: true
-tta: true
+tta: false
 CCC: false
