@@ -61,12 +61,12 @@ class Tester(Trainer):
                 gt = gt[0,0,...]
                 pre = pre[0,0,...]
                 if self.show:
-                    predict = torch.sigmoid(pre[i]).cpu().detach().numpy()
+                    predict = torch.sigmoid(pre).cpu().detach().numpy()
                     predict_b = np.where(predict >= self.CFG.threshold, 1, 0)
                     cv2.imwrite(
-                        f"save_picture/img{i}.png", np.uint8(img[i].cpu().numpy()*255))
+                        f"save_picture/img{i}.png", np.uint8(img.cpu().numpy()*255))
                     cv2.imwrite(
-                        f"save_picture/gt{i}.png", np.uint8(gt[i].cpu().numpy()*255))
+                        f"save_picture/gt{i}.png", np.uint8(gt.cpu().numpy()*255))
                     cv2.imwrite(
                         f"save_picture/pre{i}.png", np.uint8(predict*255))
                     cv2.imwrite(
