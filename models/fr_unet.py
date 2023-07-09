@@ -24,7 +24,7 @@ class conv(nn.Module):
         x = self.conv(x)
         out = x + res
         out = self.relu(out)
-        return x
+        return out
 
 
 class feature_fuse(nn.Module):
