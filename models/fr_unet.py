@@ -15,8 +15,7 @@ class conv(nn.Module):
             nn.LeakyReLU(0.1, inplace=True),
             nn.Conv2d(out_c, out_c, kernel_size=3, padding=1, bias=False),
             nn.BatchNorm2d(out_c),
-            nn.Dropout2d(dp),
-            nn.LeakyReLU(0.1, inplace=True))
+            nn.Dropout2d(dp))
         self.relu = nn.LeakyReLU(0.1, inplace=True)
 
     def forward(self, x):
