@@ -100,6 +100,25 @@ def double_threshold_iteration(index,img, h_thresh, l_thresh, save=True):
         cv2.imwrite(f"save_picture/gbin{index}.png", gbin)
     return gbin/255
 
+def double_threshold_iteration_fast(index, img, h_thresh, l_thresh, save):
+    img = torch.sigmoid(img).unsqueeze(0) # dim: [1, H, W]
+    
+    normal_mask = (img >= l_thresh).float()
+    fixed_mask = normal_mask.clone()
+    checkable_mask = (img >= l_thresh).float()
+    pre_fixed_mask = torch.zeros_like(fixed_mask) # for comparison
+    
+    while not torch.equal(pre_fixed_mask, fixed_mask):
+        pre_fixed_mask = fixed_mask.clone()
+        fixed_mask = torch.nn.functional.max_pool2d(fixed_mask, 3, 1, 1) * checkable_mask
+    
+    normal_mask = normal_mask.squeeze().cpu().numpy().astype(np.uint8) * 255
+    fixed_mask = fixed_mask.squeeze().cpu().numpy().astype(np.uint8) * 255
+    if save:
+        cv2.imwrite(f"save_picture/bin{index}.png", normal_mask)
+        cv2.imwrite(f"save_picture/gbin{index}.png", fixed_mask)
+    return fixed_mask / 255
+
 
 def recompone_overlap(preds, img_h, img_w, stride_h, stride_w):
     assert (len(preds.shape) == 4)

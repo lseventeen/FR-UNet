@@ -8,7 +8,7 @@ import torchvision.transforms.functional as TF
 from loguru import logger
 from tqdm import tqdm
 from trainer import Trainer
-from utils.helpers import dir_exists, remove_files, double_threshold_iteration
+from utils.helpers import dir_exists, remove_files, double_threshold_iteration, double_threshold_iteration_fast
 from utils.metrics import AverageMeter, get_metrics, get_metrics, count_connect_component
 import ttach as tta
 
@@ -73,8 +73,12 @@ class Tester(Trainer):
                         f"save_picture/pre_b{i}.png", np.uint8(predict_b*255))
 
                 if self.CFG.DTI:
-                    pre_DTI = double_threshold_iteration(
-                        i, pre, self.CFG.threshold, self.CFG.threshold_low, True)
+                    if self.CFG.fast_DTI:
+                        pre_DTI = double_threshold_iteration_fast(
+                            i, pre, self.CFG.threshold, self.CFG.threshold_low, True)
+                    else:
+                        pre_DTI = double_threshold_iteration(
+                            i, pre, self.CFG.threshold, self.CFG.threshold_low, True)
                     self._metrics_update(
                         *get_metrics(pre, gt, predict_b=pre_DTI).values())
                     if self.CFG.CCC:
